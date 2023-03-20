@@ -1,10 +1,12 @@
 package com.jaimayal.usersmicroservice.services;
 
+import com.jaimayal.usersmicroservice.clients.CoursesMicroserviceClient;
 import com.jaimayal.usersmicroservice.entities.User;
 import com.jaimayal.usersmicroservice.exception.UserNotFoundException;
 import com.jaimayal.usersmicroservice.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import java.util.Map;
 public class UserServiceImpl implements UserService {
     
     private UserRepository userRepository;
+    private CoursesMicroserviceClient coursesMicroserviceClient;
     
     @Override
     public List<User> getUsers() {
@@ -55,9 +58,11 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
         User userToDelete = this.getUserById(userId);
         userRepository.delete(userToDelete);
+        coursesMicroserviceClient.unrollUserFromAllCourses(userId);
     }
 
     @Override
